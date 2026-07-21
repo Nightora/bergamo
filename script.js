@@ -21,6 +21,7 @@ const WHATSAPP_NUMBER = "79286710531";
    Put your photo files in an "images" folder next to index.html.
    If "img" is left out, the emoji is shown instead — so you can add
    photos gradually, one dish at a time. */
+   //nigt
 const MENU = {
   "Пицца": {
     subtitle: "Тесто на выбор, 30 см",
