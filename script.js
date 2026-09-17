@@ -89,7 +89,7 @@ const MENU = {
     items: [
       { name: "Голубая лагуна", price: "400 р.", emoji: "🥤", img: "images/голубая-лагуна.jpg", desc: "Освежающий безалкогольный коктейль." },
       { name: "Кола", price: "100 р.", emoji: "🥤", img: "images/кола.jpg", desc: "Классическая кола." },
-      { name: "Кола", price: "200 р.", emoji: "🥤", img: "images/кола-л.jpg", desc: "Классическая кола 1 л." },
+      { name: "Кола 1л", price: "200 р.", emoji: "🥤", img: "images/кола-л.jpg", desc: "Классическая кола 1 л." },
       { name: "Натуральный", price: "200 р.", emoji: "🥤", img: "images/натуральный.jpg", desc: "Натуральный сок 1 л." },
     ]
   },
