@@ -10,18 +10,7 @@
    Example for Russia: 79261234567 */
 const WHATSAPP_NUMBER = "79286710531"; 
 
-/* ---------- 1. Menu data ----------
-   Content taken from the physical menu board (pizza / sets / rolls /
-   drinks / salads / fast food / tea / hot dishes). Edit freely to
-   update prices or descriptions.
-
-   Photos: add an "img" field with a path to show a real photo instead
-   of the emoji placeholder, e.g.
-     { name: "Маргарита", price: "500 р.", emoji: "🍅", img: "images/margherita.jpg", desc: "..." }
-   Put your photo files in an "images" folder next to index.html.
-   If "img" is left out, the emoji is shown instead — so you can add
-   photos gradually, one dish at a time. */
-   //nigt
+/* ---------- 1. Menu data ---------- */
 const MENU = {
   "Пицца": {
     subtitle: "Тесто на выбор, 30 см",
@@ -96,7 +85,7 @@ const MENU = {
   "Салаты": {
     subtitle: "Свежие салаты",
     items: [
-      { name: "Цезарь", price: "350 р.", emoji: "🥗", img: "images/салат-цезарь.jpg", desc: "Салат, курица, пармезан, соус цезарь, гренки." },
+      { name: "Салат Цезарь", price: "350 р.", emoji: "🥗", img: "images/салат-цезарь.jpg", desc: "Салат, курица, пармезан, соус цезарь, гренки." },
     ]
   },
   "Фаст фуд": {
@@ -138,8 +127,7 @@ const MENU = {
   }
 };
 
-/* ---------- 1b. Contact & social info ----------*/
-
+/* ---------- 1b. Contact & social info ---------- */
 const CONTACT_INFO = {
   address: "г. Кизилюрт, ул. Гагарина, 36", 
   hours: "Ежедневно 10:00 – 23:00",       
@@ -164,6 +152,7 @@ const scrollTopBtn = document.getElementById('scroll-top-btn');
 
 let currentCat = null;
 let currentDetailItem = null; // { cat, item } currently open in the detail view
+let deliveryMethod = 'delivery'; // 'delivery' | 'pickup'
 
 // Cart: keyed by "category|||dish name" -> { cat, item, qty }
 const cart = {};
@@ -179,7 +168,6 @@ function priceToNumber(priceStr){
 
 /* ---------- 3. Rendering helpers ---------- */
 
-// One dish card: image placeholder + name + price + qty stepper
 function makeCard(cat, item){
   const card = document.createElement('div');
   card.className = 'item-card';
@@ -198,7 +186,6 @@ function makeCard(cat, item){
   return card;
 }
 
-// Renders either a single "+" button (qty 0) or a "- N +" stepper
 function renderQtyStepper(el, cat, item, big){
   if (!el) return;
   const key = cartKey(cat, item);
@@ -233,7 +220,6 @@ function renderQtyStepper(el, cat, item, big){
   el.append(minus, count, plus);
 }
 
-// Renders a real photo if item.img is set, otherwise the emoji placeholder
 function platePicture(item){
   if (item.img) {
     return `<img src="${item.img}" alt="${item.name}" loading="lazy" decoding="async">`;
@@ -241,7 +227,6 @@ function platePicture(item){
   return item.emoji || '';
 }
 
-// Category button in the top grid
 function makeCategoryButton(cat){
   const btn = document.createElement('button');
   btn.className = 'cat-btn';
@@ -250,7 +235,6 @@ function makeCategoryButton(cat){
   return btn;
 }
 
-// A full preview section on the home screen (heading + item grid)
 function makePreviewSection(cat, data){
   const wrap = document.createElement('div');
 
@@ -276,7 +260,6 @@ function renderHome(){
 
 /* ---------- 4. Navigation ---------- */
 
-// Hides every full-screen view; each nav function then shows the one it needs
 function hideAllViews(){
   catview.classList.remove('show');
   detail.classList.remove('show');
@@ -348,7 +331,6 @@ function openContacts(){
 }
 
 function goHome(){
-  // From the cart or contacts, go back to wherever the person was (category or home)
   if (cartview.classList.contains('show') || contactsview.classList.contains('show')) {
     hideAllViews();
     if (currentCat) {
@@ -362,7 +344,6 @@ function goHome(){
     return;
   }
 
-  // From a dish detail, go back to its category list rather than all the way home
   if (detail.classList.contains('show') && currentCat) {
     detail.classList.remove('show');
     catview.classList.add('show');
@@ -390,11 +371,9 @@ function changeQty(cat, item, delta){
     cart[key] = { cat, item, qty: next };
   }
 
-  // Refresh every stepper showing this dish (home preview + category list can both show it)
   document.querySelectorAll(`.qty-stepper[data-key="${CSS.escape(key)}"]`)
     .forEach(el => renderQtyStepper(el, cat, item));
 
-  // Refresh the detail-view stepper if this dish is currently open
   if (currentDetailItem && cartKey(currentDetailItem.cat, currentDetailItem.item) === key) {
     renderQtyStepper(document.getElementById('detail-add'), cat, item, true);
   }
@@ -460,19 +439,57 @@ function renderCartView(){
   });
 
   document.getElementById('cart-total').textContent = `${cartTotal()} р.`;
+  setMethod(deliveryMethod); // keep the switch UI in sync when reopening the cart
+}
+
+/* ---------- 5b. Delivery / pickup form ---------- */
+
+function setMethod(method){
+  deliveryMethod = method;
+  document.getElementById('method-delivery').classList.toggle('active', method === 'delivery');
+  document.getElementById('method-pickup').classList.toggle('active', method === 'pickup');
+  document.getElementById('delivery-fields').style.display = method === 'delivery' ? 'block' : 'none';
+  document.getElementById('form-error').textContent = '';
 }
 
 function sendOrderToWhatsApp(){
   const entries = cartEntries();
   if (entries.length === 0) return;
 
+  const name = document.getElementById('field-name').value.trim();
+  const phone = document.getElementById('field-phone').value.trim();
+  const street = document.getElementById('field-street').value.trim();
+  const comment = document.getElementById('field-comment').value.trim();
+  const errorEl = document.getElementById('form-error');
+
+  if (!name) { errorEl.textContent = 'Укажите, как к вам обращаться.'; return; }
+  if (!phone) { errorEl.textContent = 'Укажите номер телефона для связи.'; return; }
+  if (deliveryMethod === 'delivery' && !street) {
+    errorEl.textContent = 'Укажите адрес доставки.';
+    return;
+  }
+  errorEl.textContent = '';
+
   const lines = entries.map(({ item, qty }) => `— ${item.name} × ${qty} — ${priceToNumber(item.price) * qty} р.`);
+
+  const deliveryLines = deliveryMethod === 'delivery'
+    ? [
+        'Способ получения: Доставка',
+        `Адрес: ${street}`
+      ]
+    : ['Способ получения: Самовывоз'];
+
   const text = [
     'Здравствуйте! Хочу сделать заказ в Bergamo:',
     '',
     ...lines,
     '',
-    `Итого: ${cartTotal()} р.`
+    `Итого: ${cartTotal()} р.`,
+    '',
+    `Имя: ${name}`,
+    `Телефон: ${phone}`,
+    ...deliveryLines,
+    ...(comment ? ['', `Комментарий: ${comment}`] : [])
   ].join('\n');
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
@@ -511,3 +528,4 @@ window.addEventListener('scroll', () => {
 
 renderHome();
 renderContacts();
+setMethod('delivery');

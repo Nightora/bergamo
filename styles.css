@@ -549,6 +549,89 @@ header{
   color: var(--gold-line);
 }
 
+/* ---------- Checkout form (delivery / pickup) ---------- */
+.order-form{
+  padding-bottom: 16px;
+}
+
+.form-label{
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin: 14px 0 6px;
+}
+
+.method-switch{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.method-btn{
+  border: 1.5px solid var(--gold-line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 12px 0;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.method-btn.active{
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  color: #fff;
+}
+
+.form-input{
+  width: 100%;
+  border: 1.5px solid var(--gold-line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #fff;
+  margin-bottom: 8px;
+}
+
+.form-input::placeholder{
+  color: #B3A797;
+}
+
+.form-input:focus{
+  outline: none;
+  border-color: var(--gold-deep);
+}
+
+.form-textarea{
+  resize: vertical;
+  min-height: 56px;
+}
+
+.form-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.form-error{
+  color: #B34632;
+  font-size: 12.5px;
+  font-weight: 600;
+  min-height: 16px;
+  margin-top: 2px;
+}
+
+.delivery-note{
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 12px;
+  margin: 10px 0 0;
+}
+
 /* ---------- Contacts page ---------- */
 .contactsview{
   display: none;
