@@ -449,6 +449,7 @@ function setMethod(method){
   document.getElementById('method-delivery').classList.toggle('active', method === 'delivery');
   document.getElementById('method-pickup').classList.toggle('active', method === 'pickup');
   document.getElementById('delivery-fields').style.display = method === 'delivery' ? 'block' : 'none';
+  document.getElementById('phone-field').style.display = method === 'delivery' ? 'block' : 'none';
   document.getElementById('form-error').textContent = '';
 }
 
@@ -456,17 +457,14 @@ function sendOrderToWhatsApp(){
   const entries = cartEntries();
   if (entries.length === 0) return;
 
-  const name = document.getElementById('field-name').value.trim();
   const phone = document.getElementById('field-phone').value.trim();
   const street = document.getElementById('field-street').value.trim();
   const comment = document.getElementById('field-comment').value.trim();
   const errorEl = document.getElementById('form-error');
 
-  if (!name) { errorEl.textContent = 'Укажите, как к вам обращаться.'; return; }
-  if (!phone) { errorEl.textContent = 'Укажите номер телефона для связи.'; return; }
-  if (deliveryMethod === 'delivery' && !street) {
-    errorEl.textContent = 'Укажите адрес доставки.';
-    return;
+  if (deliveryMethod === 'delivery') {
+    if (!phone) { errorEl.textContent = 'Укажите номер телефона для связи.'; return; }
+    if (!street) { errorEl.textContent = 'Укажите адрес доставки.'; return; }
   }
   errorEl.textContent = '';
 
@@ -475,9 +473,13 @@ function sendOrderToWhatsApp(){
   const deliveryLines = deliveryMethod === 'delivery'
     ? [
         'Способ получения: Доставка',
+        `Телефон: ${phone}`,
         `Адрес: ${street}`
       ]
-    : ['Способ получения: Самовывоз'];
+    : [
+        'Способ получения: Самовывоз',
+        ...(phone ? [`Телефон: ${phone}`] : [])
+      ];
 
   const text = [
     'Здравствуйте! Хочу сделать заказ в Bergamo:',
